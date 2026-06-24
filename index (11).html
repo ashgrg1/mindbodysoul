@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Presence Dashboard</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f8f7f4">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --mind:#1a6b5a;--mind-bg:#e8f5f1;--mind-light:#c8ede5;
+  --body:#2d6e3c;--body-bg:#eaf5ec;--body-light:#c8e8cc;
+  --soul:#3b3a8c;--soul-bg:#eeedf8;--soul-light:#cccbe8;
+  --presence:#6b6557;--presence-bg:#f0ece3;
+  --ink:#1c1b18;--paper:#f8f7f4;--card:#ffffff;--line:#e2ddd6;
+  --red:#c0392b;--amber:#d97706;--green:#2d6e3c;
+}
+body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;}
+
+/* NAV */
+nav{background:var(--ink);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+nav h1{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;letter-spacing:.3px;}
+nav .date-tag{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#b0a890;background:rgba(255,255,255,.08);padding:5px 10px;border-radius:20px;}
+
+/* LAYOUT */
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 60px;}
+
+/* TRIANGLE HERO */
+.hero{text-align:center;padding:32px 0 20px;position:relative;}
+.hero h2{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;margin-bottom:6px;}
+.hero p{font-size:14px;color:#7a7060;max-width:420px;margin:0 auto 28px;}
+.triangle-vis{position:relative;width:320px;height:280px;margin:0 auto;}
+.tri-svg{width:100%;height:100%;}
+.tri-node{position:absolute;text-align:center;transform:translate(-50%,-50%);}
+.tri-node .label{font-weight:700;font-size:13px;}
+.tri-node .sub{font-size:10px;font-weight:500;opacity:.7;}
+.tri-node .badge{padding:10px 18px;border-radius:12px;display:inline-block;line-height:1.3;}
+.node-mind{top:0;left:50%;}
+.node-mind .badge{background:var(--mind-bg);color:var(--mind);}
+.node-body{top:100%;left:18%;}
+.node-body .badge{background:var(--body-bg);color:var(--body);}
+.node-soul{top:100%;left:82%;}
+.node-soul .badge{background:var(--soul-bg);color:var(--soul);}
+.node-center{top:56%;left:50%;}
+.node-center .badge{background:var(--presence-bg);color:var(--presence);border-radius:50%;width:88px;height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;}
+.conn-label{position:absolute;font-size:10px;font-weight:600;color:#9a9080;background:var(--paper);padding:2px 6px;border-radius:20px;border:1px solid var(--line);}
+.conn-breath{top:44%;left:10%;}
+.conn-comp{top:44%;left:72%;}
+.conn-action{top:96%;left:44%;}
+
+/* SECTION TABS */
+.tabs{display:flex;gap:6px;margin:28px 0 20px;border-bottom:2px solid var(--line);padding-bottom:0;}
+.tab{padding:10px 16px;font-size:13px;font-weight:600;border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:0;color:#8a8070;transition:.15s;}
+.tab.active{color:var(--ink);border-bottom-color:var(--ink);}
+.tab.t-mind.active{color:var(--mind);border-bottom-color:var(--mind);}
+.tab.t-body.active{color:var(--body);border-bottom-color:var(--body);}
+.tab.t-soul.active{color:var(--soul);border-bottom-color:var(--soul);}
+.tab.t-presence.active{color:var(--presence);border-bottom-color:var(--presence);}
+.panel{display:none;}.panel.active{display:block;}
+
+/* CARDS */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.card h3{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.card h3 .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.dot-mind{background:var(--mind);}
+.dot-body{background:var(--body);}
+.dot-soul{background:var(--soul);}
+.dot-presence{background:var(--presence);}
+
+/* INPUTS */
+label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#8a8070;margin-bottom:5px;margin-top:12px;}
+label:first-of-type{margin-top:0;}
+input[type=text],input[type=number],textarea,select{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:'Inter';font-size:14px;background:var(--paper);color:var(--ink);outline:none;transition:.15s;}
+input:focus,textarea:focus,select:focus{border-color:var(--ink);}
+textarea{resize:vertical;min-height:80px;}
+input[type=range]{width:100%;accent-color:var(--ink);cursor:pointer;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;border:none;border-radius:9px;font-family:'Inter';font-size:13px;font-weight:700;cursor:pointer;transition:.15s;}
+.btn-mind{background:var(--mind);color:#fff;}
+.btn-body{background:var(--body);color:#fff;}
+.btn-soul{background:var(--soul);color:#fff;}
+.btn-presence{background:var(--presence);color:#fff;}
+.btn-ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink);}
+.btn:active{opacity:.85;transform:scale(.98);}
+.btn-sm{padding:6px 12px;font-size:12px;}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+
+/* STATS ROW */
+.stat-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.stat-box{flex:1;min-width:80px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center;}
+.stat-box .val{font-size:22px;font-weight:800;line-height:1;}
+.stat-box .lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#8a8070;margin-top:3px;}
+.stat-box.hi .val{color:var(--mind);}
+.stat-box.hi2 .val{color:var(--body);}
+.stat-box.hi3 .val{color:var(--soul);}
+
+/* TIMER */
+.timer-face{font-size:48px;font-weight:800;text-align:center;letter-spacing:-2px;margin:16px 0 12px;line-height:1;color:var(--mind);}
+.timer-bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:16px;}
+.timer-fill{height:100%;background:var(--mind);border-radius:3px;transition:width .5s linear;}
+
+/* LOG LIST */
+.log-list{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto;}
+.log-item{background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:10px 12px;display:flex;align-items:flex-start;gap:10px;}
+.log-item .meta{font-size:10px;color:#9a9080;font-weight:600;white-space:nowrap;}
+.log-item .text{font-size:13px;flex:1;line-height:1.45;}
+.log-item .del-btn{border:none;background:transparent;color:#c0b8a6;cursor:pointer;font-size:16px;line-height:1;flex-shrink:0;}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-right:4px;margin-bottom:2px;}
+
+/* WEIGHT CHART */
+.chart{height:140px;position:relative;margin:8px 0;}
+.chart-inner{display:flex;align-items:flex-end;gap:4px;height:100%;border-bottom:2px solid var(--line);padding-bottom:0;}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.bar{width:100%;border-radius:4px 4px 0 0;transition:height .4s ease;min-height:2px;}
+.bar-lbl{font-size:9px;color:#9a9080;font-weight:600;text-align:center;}
+.chart-goal-line{position:absolute;left:0;right:0;border-top:2px dashed var(--red);opacity:.5;}
+
+/* MOOD GRID */
+.mood-grid{display:flex;gap:8px;flex-wrap:wrap;}
+.mood-btn{padding:8px 12px;border:1.5px solid var(--line);border-radius:30px;font-size:13px;background:var(--paper);cursor:pointer;transition:.15s;font-weight:600;}
+.mood-btn:hover{border-color:var(--ink);}
+.mood-btn.sel{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+/* PRACTICE CHECKLIST */
+.checklist{display:flex;flex-direction:column;gap:6px;}
+.check-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid var(--line);border-radius:9px;cursor:pointer;transition:.15s;user-select:none;}
+.check-item.done{background:var(--mind-bg);border-color:var(--mind-light);}
+.check-item.done .ci-label{color:var(--mind);}
+.check-item.done-body{background:var(--body-bg);border-color:var(--body-light);}
+.check-item.done-body .ci-label{color:var(--body);}
+.check-item.done-soul{background:var(--soul-bg);border-color:var(--soul-light);}
+.check-item.done-soul .ci-label{color:var(--soul);}
+.ci-icon{font-size:18px;}
+.ci-label{font-size:13px;font-weight:600;flex:1;}
+.ci-check{width:20px;height:20px;border:2px solid var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s;}
+.check-item.done .ci-check,.check-item.done-body .ci-check,.check-item.done-soul .ci-check{background:var(--ink);border-color:var(--ink);color:#fff;}
+
+/* PROGRESS RING */
+.ring-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.ring-wrap .ring-val{font-size:28px;font-weight:800;}
+.ring-wrap .ring-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#8a8070;}
+
+/* SCROLL AREA */
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px;}
+
+/* TOAST */
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:700;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.2);opacity:0;transition:opacity .2s;pointer-events:none;}
+.toast.show{opacity:1;}
+
+/* SCORE BAR */
+.score-bar{display:flex;align-items:center;gap:10px;margin:6px 0;}
+.score-bar .s-label{font-size:12px;font-weight:600;width:100px;flex-shrink:0;}
+.score-bar .s-track{flex:1;height:8px;background:var(--line);border-radius:4px;overflow:hidden;}
+.score-bar .s-fill{height:100%;border-radius:4px;transition:width .4s ease;}
+.score-bar .s-val{font-size:12px;font-weight:700;width:28px;text-align:right;flex-shrink:0;}
+
+/* PRESENCE SCORE */
+.presence-score{display:flex;flex-direction:column;align-items:center;padding:20px;background:var(--presence-bg);border-radius:14px;margin-bottom:16px;}
+.presence-score .big-score{font-size:64px;font-weight:800;line-height:1;color:var(--presence);}
+.presence-score .score-lbl{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--presence);opacity:.7;margin-top:4px;}
+
+@media(max-width:600px){
+  .hero h2{font-size:22px;}
+  .triangle-vis{width:260px;height:230px;}
+  .tabs{overflow-x:auto;white-space:nowrap;padding-bottom:0;flex-wrap:nowrap;}
+  .tab{flex-shrink:0;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <h1>Presence Dashboard</h1>
+  <div class="date-tag" id="navDate"></div>
+</nav>
+
+<div class="wrap">
+
+  <!-- HERO TRIANGLE -->
+  <div class="hero">
+    <h2>Mind · Body · Soul</h2>
+    <p>Your three centres — guided by <strong>Presence</strong>. Choose a pillar below to track, reflect, and grow.</p>
+
+    <div class="triangle-vis">
+      <svg class="tri-svg" viewBox="0 0 320 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="160" y1="28" x2="58" y2="240" stroke="#c0b8a6" stroke-width="2"/>
+        <line x1="160" y1="28" x2="262" y2="240" stroke="#c0b8a6" stroke-width="2"/>
+        <line x1="58" y1="240" x2="262" y2="240" stroke="#c0b8a6" stroke-width="2"/>
+      </svg>
+      <div class="tri-node node-mind">
+        <div class="badge"><div class="label">Mind</div><div class="sub">attention & thought</div></div>
+      </div>
+      <div class="tri-node node-body">
+        <div class="badge"><div class="label">Body</div><div class="sub">energy & sensation</div></div>
+      </div>
+      <div class="tri-node node-soul">
+        <div class="badge"><div class="label">Heart / Soul</div><div class="sub">meaning & love</div></div>
+      </div>
+      <div class="tri-node node-center">
+        <div class="badge"><div class="label" style="font-size:12px">Presence</div><div class="sub" style="font-size:9px">here &amp; now</div></div>
+      </div>
+      <span class="conn-label conn-breath">Breath &amp; movement</span>
+      <span class="conn-label conn-comp">Compassion</span>
+      <span class="conn-label conn-action" style="bottom:auto;top:94%;">Aligned action</span>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab t-presence active" data-tab="presence">Presence</button>
+    <button class="tab t-mind" data-tab="mind">Mind</button>
+    <button class="tab t-body" data-tab="body">Body</button>
+    <button class="tab t-soul" data-tab="soul">Soul</button>
+  </div>
+
+  <!-- ===== PRESENCE PANEL ===== -->
+  <div class="panel active" id="panel-presence">
+    <div class="grid">
+
+      <!-- Daily Check-in -->
+      <div class="card">
+        <h3><span class="dot dot-presence"></span>Daily Check-in</h3>
+        <div class="presence-score">
+          <div class="big-score" id="presenceScore">—</div>
+          <div class="score-lbl">Today's Presence Score</div>
+        </div>
+        <div class="score-bar">
+          <span class="s-label" style="color:var(--mind)">Mind</span>
+          <div class="s-track"><div class="s-fill" id="bar-mind" style="background:var(--mind);width:0%"></div></div>
+          <span class="s-val" id="val-mind">—</span>
+        </div>
+        <div class="score-bar">
+          <span class="s-label" style="color:var(--body)">Body</span>
+          <div class="s-track"><div class="s-fill" id="bar-body" style="background:var(--body);width:0%"></div></div>
+          <span class="s-val" id="val-body">—</span>
+        </div>
+        <div class="score-bar">
+          <span class="s-label" style="color:var(--soul)">Soul</span>
+          <div class="s-track"><div class="s-fill" id="bar-soul" style="background:var(--soul);width:0%"></div></div>
+          <span class="s-val" id="val-soul">—</span>
+        </div>
+        <p style="font-size:11px;color:#9a9080;margin-top:12px;">Complete your daily ratings in each pillar tab to update this score.</p>
+      </div>
+
+      <!-- Daily Practices -->
+      <div class="card">
+        <h3><span class="dot dot-presence"></span>Today's Practices</h3>
+        <div class="checklist" id="practiceList"></div>
+        <div class="btn-row">
+          <button class="btn btn-presence btn-sm" id="resetPractices">Reset Day</button>
+        </div>
+      </div>
+
+      <!-- Intention -->
+      <div class="card">
+        <h3><span class="dot dot-presence"></span>Today's Intention</h3>
+        <label>Set your intention for today</label>
+        <textarea id="intentionText" placeholder="I intend to…" rows="3"></textarea>
+        <label>Evening reflection — what showed up?</label>
+        <textarea id="reflectionText" placeholder="Today I noticed…" rows="3"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-presence btn-sm" id="saveIntention">Save</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== MIND PANEL ===== -->
+  <div class="panel" id="panel-mind">
+    <div class="grid">
+
+      <!-- Meditation Timer -->
+      <div class="card">
+        <h3><span class="dot dot-mind"></span>Meditation / Breath Timer</h3>
+        <label>Duration (minutes)</label>
+        <select id="timerDur">
+          <option value="5">5 min</option>
+          <option value="10" selected>10 min</option>
+          <option value="15">15 min</option>
+          <option value="20">20 min</option>
+          <option value="30">30 min</option>
+        </select>
+        <div class="timer-face" id="timerFace">10:00</div>
+        <div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+        <div class="btn-row">
+          <button class="btn btn-mind" id="timerStart">Start</button>
+          <button class="btn btn-ghost" id="timerReset">Reset</button>
+        </div>
+        <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px;">
+          <label>Sessions today</label>
+          <div class="stat-row">
+            <div class="stat-box hi"><div class="val" id="meditationCount">0</div><div class="lbl">Sessions</div></div>
+            <div class="stat-box hi"><div class="val" id="meditationMins">0</div><div class="lbl">Minutes</div></div>
+          </div>
+        </div>
+        <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:14px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8a8070;margin-bottom:10px;">Mantra Chant</div>
+          <button class="btn btn-mind" id="omBtn" style="width:100%;font-size:14px;">🔔 Play Om Mani Padme Hum</button>
+          <div id="omPlayer" style="display:none;margin-top:10px;border-radius:10px;overflow:hidden;">
+            <iframe id="omFrame" width="100%" height="80" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen
+              style="border-radius:10px;"></iframe>
+          </div>
+          <p style="font-size:11px;color:#9a9080;margin-top:8px;text-align:center;font-style:italic;">Om Mani Padme Hum — the jewel in the lotus</p>
+        </div>
+      </div>
+
+      <!-- Thought Journal -->
+      <div class="card">
+        <h3><span class="dot dot-mind"></span>Thought Journal</h3>
+        <label>Tag</label>
+        <div class="mood-grid" id="thoughtTags">
+          <button class="mood-btn" data-tag="worry">Worry</button>
+          <button class="mood-btn" data-tag="plan">Planning</button>
+          <button class="mood-btn" data-tag="judge">Judging</button>
+          <button class="mood-btn" data-tag="creative">Creative</button>
+          <button class="mood-btn" data-tag="grateful">Grateful</button>
+          <button class="mood-btn" data-tag="fear">Fear</button>
+        </div>
+        <label>Capture the thought</label>
+        <textarea id="thoughtText" placeholder="Notice the thought without judgment…" rows="3"></textarea>
+        <label>Reframe (optional)</label>
+        <input type="text" id="thoughtReframe" placeholder="A kinder or more balanced perspective…">
+        <div class="btn-row">
+          <button class="btn btn-mind btn-sm" id="addThought">Log Thought</button>
+        </div>
+        <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px;">
+          <div class="log-list" id="thoughtLog"></div>
+        </div>
+      </div>
+
+      <!-- Mind Rating -->
+      <div class="card">
+        <h3><span class="dot dot-mind"></span>Daily Mind Rating</h3>
+        <label>How clear & focused was your mind today? <span id="mindRatingVal" style="color:var(--mind);font-weight:800">5</span>/10</label>
+        <input type="range" min="1" max="10" value="5" id="mindRating">
+        <label style="margin-top:16px">Mood check-in</label>
+        <div class="mood-grid" id="moodGrid">
+          <button class="mood-btn" data-mood="calm">😌 Calm</button>
+          <button class="mood-btn" data-mood="focused">🎯 Focused</button>
+          <button class="mood-btn" data-mood="anxious">😰 Anxious</button>
+          <button class="mood-btn" data-mood="scattered">💨 Scattered</button>
+          <button class="mood-btn" data-mood="sad">😔 Sad</button>
+          <button class="mood-btn" data-mood="happy">😊 Happy</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-mind btn-sm" id="saveMindRating">Save Rating</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== BODY PANEL ===== -->
+  <div class="panel" id="panel-body">
+    <div class="grid">
+
+      <!-- Weight Tracker -->
+      <div class="card">
+        <h3><span class="dot dot-body"></span>Weight Tracker</h3>
+        <div class="stat-row">
+          <div class="stat-box hi2"><div class="val" id="currentWeight">—</div><div class="lbl">Current (lbs)</div></div>
+          <div class="stat-box hi2"><div class="val" id="goalWeight">—</div><div class="lbl">Goal (lbs)</div></div>
+          <div class="stat-box"><div class="val" id="weightDiff">—</div><div class="lbl">To Go</div></div>
+        </div>
+        <div class="chart" id="weightChart">
+          <div class="chart-inner" id="weightBars"></div>
+        </div>
+        <label>Log today's weight (lbs)</label>
+        <input type="number" id="weightInput" placeholder="e.g. 185.5" step="0.1">
+        <label>Goal weight (lbs)</label>
+        <input type="number" id="goalInput" placeholder="e.g. 165" step="0.1">
+        <div class="btn-row">
+          <button class="btn btn-body btn-sm" id="logWeight">Log Weight</button>
+          <button class="btn btn-ghost btn-sm" id="setGoal">Set Goal</button>
+        </div>
+      </div>
+
+      <!-- Exercise Log -->
+      <div class="card">
+        <h3><span class="dot dot-body"></span>Movement & Exercise</h3>
+        <div class="stat-row">
+          <div class="stat-box hi2"><div class="val" id="weeklyWorkouts">0</div><div class="lbl">This Week</div></div>
+          <div class="stat-box hi2"><div class="val" id="weeklyMins">0</div><div class="lbl">Active Mins</div></div>
+        </div>
+        <label>Activity type</label>
+        <select id="activityType">
+          <option>Walk</option>
+          <option>Run</option>
+          <option>Strength Training</option>
+          <option>Yoga / Stretching</option>
+          <option>Cycling</option>
+          <option>Swim</option>
+          <option>Breathwork</option>
+          <option>Other</option>
+        </select>
+        <label>Duration (minutes)</label>
+        <input type="number" id="activityDur" placeholder="30" min="1">
+        <label>Notes</label>
+        <input type="text" id="activityNote" placeholder="How did it feel?">
+        <div class="btn-row">
+          <button class="btn btn-body btn-sm" id="logActivity">Log Activity</button>
+        </div>
+        <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px;">
+          <div class="log-list" id="activityLog"></div>
+        </div>
+      </div>
+
+      <!-- Body Rating -->
+      <div class="card">
+        <h3><span class="dot dot-body"></span>Daily Body Rating</h3>
+        <label>Energy level today <span id="bodyRatingVal" style="color:var(--body);font-weight:800">5</span>/10</label>
+        <input type="range" min="1" max="10" value="5" id="bodyRating">
+        <label style="margin-top:16px">How is your body feeling?</label>
+        <div class="mood-grid" id="bodyMoodGrid">
+          <button class="mood-btn" data-bmood="energised">⚡ Energised</button>
+          <button class="mood-btn" data-bmood="rested">😴 Rested</button>
+          <button class="mood-btn" data-bmood="tired">🥱 Tired</button>
+          <button class="mood-btn" data-bmood="sore">🤕 Sore</button>
+          <button class="mood-btn" data-bmood="strong">💪 Strong</button>
+          <button class="mood-btn" data-bmood="heavy">🪨 Heavy</button>
+        </div>
+        <label style="margin-top:14px">Water intake today</label>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="display:flex;gap:5px;" id="waterCups">
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:14px;">
+          <button class="btn btn-body btn-sm" id="saveBodyRating">Save Rating</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== SOUL PANEL ===== -->
+  <div class="panel" id="panel-soul">
+    <div class="grid">
+
+      <!-- Gratitude -->
+      <div class="card">
+        <h3><span class="dot dot-soul"></span>Gratitude Journal</h3>
+        <p style="font-size:12px;color:#9a9080;margin-bottom:12px;">The soul thrives on appreciation. Name three things you are grateful for today.</p>
+        <label>1.</label><input type="text" id="grat1" placeholder="I am grateful for…">
+        <label>2.</label><input type="text" id="grat2" placeholder="I am grateful for…">
+        <label>3.</label><input type="text" id="grat3" placeholder="I am grateful for…">
+        <div class="btn-row">
+          <button class="btn btn-soul btn-sm" id="saveGratitude">Save Gratitude</button>
+        </div>
+        <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px;">
+          <div class="log-list" id="gratLog"></div>
+        </div>
+      </div>
+
+      <!-- Values & Meaning -->
+      <div class="card">
+        <h3><span class="dot dot-soul"></span>Values & Meaning</h3>
+        <label>My core values (guides for aligned action)</label>
+        <textarea id="valuesText" placeholder="e.g. Love, Growth, Integrity, Service…" rows="3"></textarea>
+        <label style="margin-top:14px">What gave my life meaning today?</label>
+        <textarea id="meaningText" placeholder="Today I found meaning in…" rows="3"></textarea>
+        <label>Compassion practice — who did I extend kindness to today?</label>
+        <input type="text" id="compassionText" placeholder="Myself, a friend, a stranger…">
+        <div class="btn-row">
+          <button class="btn btn-soul btn-sm" id="saveValues">Save</button>
+        </div>
+      </div>
+
+      <!-- Soul Rating -->
+      <div class="card">
+        <h3><span class="dot dot-soul"></span>Daily Soul Rating</h3>
+        <label>How connected to meaning & love did you feel today? <span id="soulRatingVal" style="color:var(--soul);font-weight:800">5</span>/10</label>
+        <input type="range" min="1" max="10" value="5" id="soulRating">
+        <label style="margin-top:16px">Soul state</label>
+        <div class="mood-grid" id="soulMoodGrid">
+          <button class="mood-btn" data-smood="connected">🔗 Connected</button>
+          <button class="mood-btn" data-smood="loving">❤️ Loving</button>
+          <button class="mood-btn" data-smood="lost">🌫️ Lost</button>
+          <button class="mood-btn" data-smood="purposeful">🌟 Purposeful</button>
+          <button class="mood-btn" data-smood="lonely">🌙 Lonely</button>
+          <button class="mood-btn" data-smood="peaceful">🕊️ Peaceful</button>
+        </div>
+        <label style="margin-top:14px">One aligned action I took today</label>
+        <input type="text" id="alignedAction" placeholder="Something my soul said yes to…">
+        <div class="btn-row">
+          <button class="btn btn-soul btn-sm" id="saveSoulRating">Save Rating</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Storage helpers ─────────────────────────────────────────────────────────
+const KEY = 'presence-dash-v1';
+function load() {
+  try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e) { return {}; }
+}
+function save(data) {
+  try { localStorage.setItem(KEY, JSON.stringify(data)); } catch(e) {}
+}
+let db = load();
+function persist() { save(db); }
+
+// ── Date helpers ─────────────────────────────────────────────────────────────
+function today() { return new Date().toISOString().slice(0,10); }
+function shortDate(d) { return new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+function getDay(obj, key) {
+  if(!obj[key]) obj[key] = {};
+  if(!obj[key][today()]) obj[key][today()] = {};
+  return obj[key][today()];
+}
+
+// ── Toast ────────────────────────────────────────────────────────────────────
+let toastT;
+function flash(m) {
+  const t = document.getElementById('toast');
+  t.textContent = m; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+// ── Nav date ─────────────────────────────────────────────────────────────────
+document.getElementById('navDate').textContent =
+  new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PRESENCE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const PRACTICES = [
+  {id:'med',  label:'Meditate / breathe',       icon:'🧘', type:'mind'},
+  {id:'move', label:'Move your body',            icon:'🏃', type:'body'},
+  {id:'grat', label:'Write 3 gratitudes',        icon:'🙏', type:'soul'},
+  {id:'water',label:'Drink 8 cups of water',     icon:'💧', type:'body'},
+  {id:'jour', label:'Journal a thought',         icon:'📝', type:'mind'},
+  {id:'kind', label:'One act of compassion',     icon:'❤️', type:'soul'},
+  {id:'walk', label:'Take a mindful walk',       icon:'🌿', type:'body'},
+  {id:'intent',label:'Set daily intention',      icon:'🌅', type:'mind'},
+];
+
+function renderPractices() {
+  const day = getDay(db, 'practices');
+  const list = document.getElementById('practiceList');
+  list.innerHTML = '';
+  PRACTICES.forEach(p=>{
+    const done = !!day[p.id];
+    const div = document.createElement('div');
+    div.className = 'check-item' + (done ? (' done-'+p.type) : '');
+    div.innerHTML = `<span class="ci-icon">${p.icon}</span><span class="ci-label">${p.label}</span><span class="ci-check">${done?'✓':''}</span>`;
+    div.addEventListener('click',()=>{
+      day[p.id] = !day[p.id];
+      persist();
+      renderPractices();
+      updatePresenceScore();
+    });
+    list.appendChild(div);
+  });
+}
+
+function updatePresenceScore() {
+  const md = (db.ratings?.mind?.[today()]?.rating) ?? null;
+  const bd = (db.ratings?.body?.[today()]?.rating) ?? null;
+  const sd = (db.ratings?.soul?.[today()]?.rating) ?? null;
+  const set = [md,bd,sd].filter(v=>v!==null);
+  const avg = set.length ? Math.round(set.reduce((a,b)=>a+b,0)/set.length*10)/10 : null;
+
+  document.getElementById('presenceScore').textContent = avg !== null ? avg : '—';
+  const pct = v => v !== null ? (v/10*100)+'%' : '0%';
+  document.getElementById('bar-mind').style.width = pct(md);
+  document.getElementById('bar-body').style.width = pct(bd);
+  document.getElementById('bar-soul').style.width = pct(sd);
+  document.getElementById('val-mind').textContent = md ?? '—';
+  document.getElementById('val-body').textContent = bd ?? '—';
+  document.getElementById('val-soul').textContent = sd ?? '—';
+}
+
+document.getElementById('resetPractices').addEventListener('click',()=>{
+  if(!confirm('Reset all practices for today?')) return;
+  if(db.practices) db.practices[today()] = {};
+  persist(); renderPractices(); updatePresenceScore();
+});
+
+// Intention
+function loadIntention() {
+  const d = getDay(db,'intention');
+  document.getElementById('intentionText').value = d.intention || '';
+  document.getElementById('reflectionText').value = d.reflection || '';
+}
+document.getElementById('saveIntention').addEventListener('click',()=>{
+  const d = getDay(db,'intention');
+  d.intention = document.getElementById('intentionText').value;
+  d.reflection = document.getElementById('reflectionText').value;
+  persist(); flash('Intention saved');
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MIND
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Timer
+let timerInterval = null, timerRunning = false, timerRemaining = 0, timerTotal = 0;
+
+function timerFmt(s) {
+  return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+}
+function timerUpdate() {
+  document.getElementById('timerFace').textContent = timerFmt(timerRemaining);
+  const pct = timerTotal > 0 ? (timerRemaining/timerTotal*100)+'%' : '100%';
+  document.getElementById('timerFill').style.width = pct;
+}
+function timerReset() {
+  clearInterval(timerInterval); timerRunning = false;
+  timerTotal = timerRemaining = +document.getElementById('timerDur').value * 60;
+  document.getElementById('timerStart').textContent = 'Start';
+  timerUpdate();
+}
+document.getElementById('timerDur').addEventListener('change', timerReset);
+document.getElementById('timerReset').addEventListener('click', timerReset);
+document.getElementById('timerStart').addEventListener('click', ()=>{
+  if(!timerRunning) {
+    if(timerRemaining <= 0) timerReset();
+    timerRunning = true;
+    document.getElementById('timerStart').textContent = 'Pause';
+    timerInterval = setInterval(()=>{
+      timerRemaining--;
+      timerUpdate();
+      if(timerRemaining <= 0) {
+        clearInterval(timerInterval); timerRunning = false;
+        document.getElementById('timerStart').textContent = 'Start';
+        // log session
+        const d = getDay(db,'meditation');
+        d.sessions = (d.sessions||0)+1;
+        d.minutes = (d.minutes||0) + +document.getElementById('timerDur').value;
+        persist();
+        updateMeditationStats();
+        flash('Session complete! 🧘');
+      }
+    },1000);
+  } else {
+    clearInterval(timerInterval); timerRunning = false;
+    document.getElementById('timerStart').textContent = 'Resume';
+  }
+});
+function updateMeditationStats() {
+  const d = getDay(db,'meditation');
+  document.getElementById('meditationCount').textContent = d.sessions||0;
+  document.getElementById('meditationMins').textContent = d.minutes||0;
+}
+
+// Thought Journal
+let selectedTag = null;
+document.querySelectorAll('#thoughtTags .mood-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('#thoughtTags .mood-btn').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel'); selectedTag = b.dataset.tag;
+  });
+});
+document.getElementById('addThought').addEventListener('click',()=>{
+  const text = document.getElementById('thoughtText').value.trim();
+  if(!text){ flash('Write a thought first'); return; }
+  if(!db.thoughts) db.thoughts = [];
+  db.thoughts.unshift({
+    date: today(),
+    tag: selectedTag,
+    text,
+    reframe: document.getElementById('thoughtReframe').value.trim()
+  });
+  document.getElementById('thoughtText').value = '';
+  document.getElementById('thoughtReframe').value = '';
+  selectedTag = null;
+  document.querySelectorAll('#thoughtTags .mood-btn').forEach(x=>x.classList.remove('sel'));
+  persist(); renderThoughts(); flash('Thought logged');
+});
+function renderThoughts() {
+  const list = document.getElementById('thoughtLog');
+  const entries = (db.thoughts||[]).slice(0,20);
+  list.innerHTML = '';
+  if(!entries.length){list.innerHTML='<div style="font-size:12px;color:#9a9080;padding:8px 0;">No thoughts logged yet.</div>';return;}
+  entries.forEach((t,i)=>{
+    const div = document.createElement('div');
+    div.className = 'log-item';
+    div.innerHTML = `<div class="meta">${shortDate(t.date)}${t.tag?'<br><span class="tag" style="background:var(--mind-bg);color:var(--mind)">'+t.tag+'</span>':''}</div>
+      <div class="text">${t.text}${t.reframe?'<div style="font-size:11px;color:var(--mind);margin-top:4px;font-style:italic">↳ '+t.reframe+'</div>':''}</div>
+      <button class="del-btn" data-i="${i}">×</button>`;
+    list.appendChild(div);
+  });
+  list.querySelectorAll('.del-btn').forEach(b=>{
+    b.addEventListener('click',()=>{db.thoughts.splice(+b.dataset.i,1);persist();renderThoughts();});
+  });
+}
+
+// Mind Rating
+const mindRatingEl = document.getElementById('mindRating');
+mindRatingEl.addEventListener('input',()=>{
+  document.getElementById('mindRatingVal').textContent = mindRatingEl.value;
+});
+let selectedMood = null;
+document.querySelectorAll('#moodGrid .mood-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('#moodGrid .mood-btn').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel'); selectedMood = b.dataset.mood;
+  });
+});
+document.getElementById('saveMindRating').addEventListener('click',()=>{
+  if(!db.ratings) db.ratings = {};
+  if(!db.ratings.mind) db.ratings.mind = {};
+  db.ratings.mind[today()] = {rating:+mindRatingEl.value, mood:selectedMood};
+  persist(); updatePresenceScore(); flash('Mind rating saved ✓');
+});
+function loadMindRating() {
+  const d = db.ratings?.mind?.[today()];
+  if(d) {
+    mindRatingEl.value = d.rating;
+    document.getElementById('mindRatingVal').textContent = d.rating;
+    if(d.mood) {
+      document.querySelectorAll('#moodGrid .mood-btn').forEach(b=>{
+        if(b.dataset.mood===d.mood) b.classList.add('sel');
+      });
+      selectedMood = d.mood;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// BODY
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function logWeight() {
+  const w = parseFloat(document.getElementById('weightInput').value);
+  if(isNaN(w)||w<=0){flash('Enter a valid weight');return;}
+  if(!db.weight) db.weight = [];
+  db.weight.push({date:today(), val:w});
+  if(db.weight.length > 60) db.weight = db.weight.slice(-60);
+  document.getElementById('weightInput').value = '';
+  persist(); renderWeight(); flash('Weight logged');
+}
+function setGoal() {
+  const g = parseFloat(document.getElementById('goalInput').value);
+  if(isNaN(g)||g<=0){flash('Enter a valid goal weight');return;}
+  db.weightGoal = g;
+  persist(); renderWeight(); flash('Goal set');
+}
+function renderWeight() {
+  const entries = db.weight || [];
+  const goal = db.weightGoal || null;
+  const last = entries.length ? entries[entries.length-1].val : null;
+  document.getElementById('currentWeight').textContent = last ? last.toFixed(1) : '—';
+  document.getElementById('goalWeight').textContent = goal ? goal.toFixed(1) : '—';
+  const diff = (last && goal) ? (last - goal) : null;
+  document.getElementById('weightDiff').textContent = diff !== null ? (diff>0?'-'+diff.toFixed(1):'+'+Math.abs(diff).toFixed(1)) : '—';
+  if(goal) document.getElementById('goalInput').value = goal;
+
+  // chart
+  const recent = entries.slice(-14);
+  const barsEl = document.getElementById('weightBars');
+  barsEl.innerHTML = '';
+  if(!recent.length){barsEl.innerHTML='<div style="font-size:11px;color:#9a9080;padding:8px">No data yet.</div>';return;}
+  const vals = recent.map(e=>e.val);
+  const minV = Math.min(...vals, goal||Infinity) * 0.97;
+  const maxV = Math.max(...vals) * 1.01;
+  const range = maxV - minV || 1;
+  recent.forEach(e=>{
+    const h = ((e.val-minV)/range*100).toFixed(1);
+    const div = document.createElement('div');
+    div.className = 'bar-wrap';
+    div.innerHTML = `<div class="bar" style="height:${h}%;background:var(--body);opacity:.75;"></div><div class="bar-lbl">${shortDate(e.date)}</div>`;
+    barsEl.appendChild(div);
+  });
+  // goal line
+  if(goal){
+    const goalPct = ((goal-minV)/range*100).toFixed(1);
+    const chart = document.getElementById('weightChart');
+    let line = chart.querySelector('.chart-goal-line');
+    if(!line){line=document.createElement('div');line.className='chart-goal-line';chart.appendChild(line);}
+    line.style.bottom = goalPct+'%';
+  }
+}
+
+document.getElementById('logWeight').addEventListener('click', logWeight);
+document.getElementById('setGoal').addEventListener('click', setGoal);
+
+// Activity log
+function logActivity() {
+  const dur = parseInt(document.getElementById('activityDur').value);
+  if(!dur||dur<=0){flash('Enter duration');return;}
+  if(!db.activity) db.activity = [];
+  db.activity.unshift({
+    date: today(),
+    type: document.getElementById('activityType').value,
+    dur,
+    note: document.getElementById('activityNote').value.trim()
+  });
+  if(db.activity.length > 100) db.activity = db.activity.slice(0,100);
+  document.getElementById('activityDur').value = '';
+  document.getElementById('activityNote').value = '';
+  persist(); renderActivity(); flash('Activity logged');
+}
+function renderActivity() {
+  const entries = db.activity || [];
+  const weekAgo = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
+  const thisWeek = entries.filter(e=>e.date>=weekAgo);
+  document.getElementById('weeklyWorkouts').textContent = thisWeek.length;
+  document.getElementById('weeklyMins').textContent = thisWeek.reduce((s,e)=>s+e.dur,0);
+
+  const list = document.getElementById('activityLog');
+  list.innerHTML = '';
+  const recent = entries.slice(0,15);
+  if(!recent.length){list.innerHTML='<div style="font-size:12px;color:#9a9080;padding:8px 0;">No activity logged yet.</div>';return;}
+  recent.forEach((a,i)=>{
+    const div = document.createElement('div');
+    div.className = 'log-item';
+    div.innerHTML = `<div class="meta">${shortDate(a.date)}<br><strong>${a.dur}m</strong></div>
+      <div class="text"><span class="tag" style="background:var(--body-bg);color:var(--body)">${a.type}</span>${a.note?'<br>'+a.note:''}</div>
+      <button class="del-btn" data-i="${i}">×</button>`;
+    list.appendChild(div);
+  });
+  list.querySelectorAll('.del-btn').forEach(b=>{
+    b.addEventListener('click',()=>{db.activity.splice(+b.dataset.i,1);persist();renderActivity();});
+  });
+}
+document.getElementById('logActivity').addEventListener('click', logActivity);
+
+// Body rating
+const bodyRatingEl = document.getElementById('bodyRating');
+bodyRatingEl.addEventListener('input',()=>{
+  document.getElementById('bodyRatingVal').textContent = bodyRatingEl.value;
+});
+let selectedBodyMood = null;
+document.querySelectorAll('#bodyMoodGrid .mood-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('#bodyMoodGrid .mood-btn').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel'); selectedBodyMood = b.dataset.bmood;
+  });
+});
+
+// Water cups
+function renderWaterCups() {
+  const d = getDay(db,'water');
+  const cups = d.cups||0;
+  const el = document.getElementById('waterCups');
+  el.innerHTML = '';
+  for(let i=1;i<=8;i++){
+    const btn = document.createElement('button');
+    btn.style.cssText='border:2px solid '+(i<=cups?'var(--body)':'var(--line)')+';background:'+(i<=cups?'var(--body-bg)':'transparent')+';color:'+(i<=cups?'var(--body)':'#c0b8a6')+';border-radius:8px;padding:6px 8px;font-size:15px;cursor:pointer;';
+    btn.textContent='💧';
+    btn.title = i+' cup'+(i>1?'s':'');
+    btn.addEventListener('click',()=>{
+      d.cups = (d.cups===i)?i-1:i;
+      persist(); renderWaterCups();
+    });
+    el.appendChild(btn);
+  }
+}
+document.getElementById('saveBodyRating').addEventListener('click',()=>{
+  if(!db.ratings) db.ratings = {};
+  if(!db.ratings.body) db.ratings.body = {};
+  db.ratings.body[today()] = {rating:+bodyRatingEl.value, mood:selectedBodyMood};
+  persist(); updatePresenceScore(); flash('Body rating saved ✓');
+});
+function loadBodyRating() {
+  const d = db.ratings?.body?.[today()];
+  if(d) {
+    bodyRatingEl.value = d.rating;
+    document.getElementById('bodyRatingVal').textContent = d.rating;
+    if(d.mood) {
+      document.querySelectorAll('#bodyMoodGrid .mood-btn').forEach(b=>{
+        if(b.dataset.bmood===d.mood) b.classList.add('sel');
+      });
+      selectedBodyMood = d.mood;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SOUL
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function saveGratitude() {
+  const g1=document.getElementById('grat1').value.trim();
+  const g2=document.getElementById('grat2').value.trim();
+  const g3=document.getElementById('grat3').value.trim();
+  if(!g1&&!g2&&!g3){flash('Write at least one gratitude');return;}
+  if(!db.gratitude) db.gratitude = [];
+  db.gratitude.unshift({date:today(),items:[g1,g2,g3].filter(Boolean)});
+  if(db.gratitude.length>60) db.gratitude=db.gratitude.slice(0,60);
+  document.getElementById('grat1').value='';
+  document.getElementById('grat2').value='';
+  document.getElementById('grat3').value='';
+  persist(); renderGratLog(); flash('Gratitude saved 🙏');
+}
+function renderGratLog() {
+  const list = document.getElementById('gratLog');
+  const entries = (db.gratitude||[]).slice(0,15);
+  list.innerHTML='';
+  if(!entries.length){list.innerHTML='<div style="font-size:12px;color:#9a9080;padding:8px 0;">No entries yet.</div>';return;}
+  entries.forEach((g,i)=>{
+    const div = document.createElement('div');
+    div.className='log-item';
+    div.innerHTML=`<div class="meta">${shortDate(g.date)}</div>
+      <div class="text">${g.items.map((t,j)=>'<div>'+(j+1)+'. '+t+'</div>').join('')}</div>
+      <button class="del-btn" data-i="${i}">×</button>`;
+    list.appendChild(div);
+  });
+  list.querySelectorAll('.del-btn').forEach(b=>{
+    b.addEventListener('click',()=>{db.gratitude.splice(+b.dataset.i,1);persist();renderGratLog();});
+  });
+}
+document.getElementById('saveGratitude').addEventListener('click', saveGratitude);
+
+// Values
+function loadValues() {
+  const d = getDay(db,'soul');
+  document.getElementById('valuesText').value = db.coreValues||'';
+  document.getElementById('meaningText').value = d.meaning||'';
+  document.getElementById('compassionText').value = d.compassion||'';
+  document.getElementById('alignedAction').value = d.alignedAction||'';
+}
+document.getElementById('saveValues').addEventListener('click',()=>{
+  const d = getDay(db,'soul');
+  db.coreValues = document.getElementById('valuesText').value;
+  d.meaning = document.getElementById('meaningText').value;
+  d.compassion = document.getElementById('compassionText').value;
+  persist(); flash('Soul notes saved ✓');
+});
+
+// Soul Rating
+const soulRatingEl = document.getElementById('soulRating');
+soulRatingEl.addEventListener('input',()=>{
+  document.getElementById('soulRatingVal').textContent = soulRatingEl.value;
+});
+let selectedSoulMood = null;
+document.querySelectorAll('#soulMoodGrid .mood-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('#soulMoodGrid .mood-btn').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel'); selectedSoulMood = b.dataset.smood;
+  });
+});
+document.getElementById('saveSoulRating').addEventListener('click',()=>{
+  if(!db.ratings) db.ratings = {};
+  if(!db.ratings.soul) db.ratings.soul = {};
+  db.ratings.soul[today()] = {rating:+soulRatingEl.value, mood:selectedSoulMood};
+  const d = getDay(db,'soul');
+  d.alignedAction = document.getElementById('alignedAction').value;
+  persist(); updatePresenceScore(); flash('Soul rating saved ✓');
+});
+function loadSoulRating() {
+  const d = db.ratings?.soul?.[today()];
+  if(d) {
+    soulRatingEl.value = d.rating;
+    document.getElementById('soulRatingVal').textContent = d.rating;
+    if(d.mood) {
+      document.querySelectorAll('#soulMoodGrid .mood-btn').forEach(b=>{
+        if(b.dataset.smood===d.mood) b.classList.add('sel');
+      });
+      selectedSoulMood = d.mood;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════════
+// OM MANI PADME HUM
+(function(){
+  const btn = document.getElementById('omBtn');
+  const player = document.getElementById('omPlayer');
+  const frame = document.getElementById('omFrame');
+  let playing = false;
+  btn.addEventListener('click', ()=>{
+    if(!playing){
+      frame.src = 'https://www.youtube.com/embed/pEFqHEPCsOE?autoplay=1&loop=1&playlist=pEFqHEPCsOE&controls=1';
+      player.style.display = 'block';
+      btn.textContent = '⏹ Stop Chant';
+      playing = true;
+    } else {
+      frame.src = '';
+      player.style.display = 'none';
+      btn.textContent = '🔔 Play Om Mani Padme Hum';
+      playing = false;
+    }
+  });
+})();
+
+timerReset();
+updateMeditationStats();
+renderPractices();
+loadIntention();
+updatePresenceScore();
+renderThoughts();
+loadMindRating();
+renderWeight();
+renderActivity();
+renderWaterCups();
+loadBodyRating();
+renderGratLog();
+loadValues();
+loadSoulRating();
+</script>
+</body>
+</html>
